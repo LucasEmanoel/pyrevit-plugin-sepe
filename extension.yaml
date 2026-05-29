@@ -1,0 +1,7 @@
+name: plugin-revit
+type: extension
+builtin: false
+author: Célula BIM
+description: Plugin em pyRevit com ferramentas e automações para a Secretaria de Projetos Estratégicos de Pernambuco.
+url: https://github.com/sepe-gov-pe/plugin-revit.git
+website: https://github.com/sepe-gov-pe/plugin-revit
