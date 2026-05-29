@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #! ironpython3
 
-"""Classifica todas as paredes, pisos e telhados por ambiente."""
+"""Classifica todas as paredes, pisos, telhados e forros por ambiente."""
 
 from Autodesk.Revit.DB import (
     XYZ,
@@ -10,7 +10,8 @@ from Autodesk.Revit.DB import (
     Transaction,
     Wall,
     Floor,
-    RoofBase
+    RoofBase,
+    Ceiling # Adicionada a classe nativa de Forros/Tetos
 )
 
 doc = __revit__.ActiveUIDocument.Document
@@ -25,7 +26,7 @@ def get_floors(doc):
     """Lista com todos os pisos do projeto."""
     return (
         FilteredElementCollector(doc)
-        .OfClass(Floor) # Corrigido para Floor
+        .OfClass(Floor)
         .WhereElementIsNotElementType()
         .ToElements()
     )
@@ -37,7 +38,6 @@ def get_point_floor(floor):
     
     x_mid = (bbox.Min.X + bbox.Max.X) / 2.0
     y_mid = (bbox.Min.Y + bbox.Max.Y) / 2.0
-    # Usa o topo do Bounding Box e joga o offset para cima
     z_point = bbox.Max.Z + OFFSET 
     
     return XYZ(x_mid, y_mid, z_point)
@@ -50,7 +50,7 @@ def get_roofs(doc):
     """Lista com todos os telhados do projeto."""
     return (
         FilteredElementCollector(doc)
-        .OfClass(RoofBase) # Corrigido para RoofBase
+        .OfClass(RoofBase)
         .WhereElementIsNotElementType()
         .ToElements()
     )
@@ -62,7 +62,31 @@ def get_point_roof(roof):
     
     x_mid = (bbox.Min.X + bbox.Max.X) / 2.0
     y_mid = (bbox.Min.Y + bbox.Max.Y) / 2.0
-    # Usa a base do Bounding Box e joga o offset para baixo
+    z_point = bbox.Min.Z - OFFSET 
+    
+    return XYZ(x_mid, y_mid, z_point)
+
+
+##################################################################################
+#####                               CEILING                                 ######
+##################################################################################
+def get_ceilings(doc):
+    """Lista com todos os forros do projeto."""
+    return (
+        FilteredElementCollector(doc)
+        .OfClass(Ceiling) # Coleta especificamente Forros
+        .WhereElementIsNotElementType()
+        .ToElements()
+    )
+
+def get_point_ceiling(ceiling):
+    """Retorna um ponto levemente abaixo do centro do forro para entrar no ambiente."""
+    bbox = ceiling.get_BoundingBox(None)
+    if not bbox: return None
+    
+    x_mid = (bbox.Min.X + bbox.Max.X) / 2.0
+    y_mid = (bbox.Min.Y + bbox.Max.Y) / 2.0
+    # Usa a base do Bounding Box do forro e joga o offset para baixo
     z_point = bbox.Min.Z - OFFSET 
     
     return XYZ(x_mid, y_mid, z_point)
@@ -146,12 +170,12 @@ def main(doc):
     with Transaction(doc, "SEPE - Identificar Ambiente") as t:
         t.Start()
         try:
-            # Dicionário de mapeamento: { Elementos: Função_para_pegar_ponto }
             element_map = {}
             
             for w in get_walls(doc): element_map[w] = get_point
             for f in get_floors(doc): element_map[f] = get_point_floor
             for r in get_roofs(doc): element_map[r] = get_point_roof
+            for c in get_ceilings(doc): element_map[c] = get_point_ceiling # Incluído no mapeamento
 
             for element, point_func in element_map.items():
                 phase = get_phase(element, doc)
