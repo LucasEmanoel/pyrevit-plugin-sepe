@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #! ironpython3
 
-"""Verifica se as paredes possuem vãos (portas, janelas, aberturas) e atualiza o parâmetro."""
+"""Verifica se as paredes possuem vãos e atualiza o parâmetro do tipo Sim/Não."""
 
 from Autodesk.Revit.DB import (
     FilteredElementCollector,
@@ -23,17 +23,14 @@ def get_walls(doc):
     )
 
 def verificar_e_definir_vao(wall):
-    """Verifica se a parede possui inserções (vãos) e define o parâmetro como Sim ou Não."""
     param = wall.LookupParameter(PARAM_VAO)
     if param and not param.IsReadOnly:
-        # ENCONTRA JANELAS E ABERTURAS NA PAREDE
         insercoes = wall.FindInserts(False, True, True, True)
         
-        # Se a lista de inserções tiver elementos, tem vão!
         if len(insercoes) > 0:
-            param.Set("Sim")
+            param.Set(1)
         else:
-            param.Set("Não")
+            param.Set(0)
         return True
     return False
 
