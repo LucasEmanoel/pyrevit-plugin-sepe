@@ -44,30 +44,6 @@ def get_point_floor(floor):
 
 
 ##################################################################################
-#####                                ROOF                                   ######
-##################################################################################
-def get_roofs(doc):
-    """Lista com todos os telhados do projeto."""
-    return (
-        FilteredElementCollector(doc)
-        .OfClass(RoofBase)
-        .WhereElementIsNotElementType()
-        .ToElements()
-    )
-
-def get_point_roof(roof):
-    """Retorna um ponto levemente abaixo do centro do telhado para entrar no ambiente."""
-    bbox = roof.get_BoundingBox(None)
-    if not bbox: return None
-    
-    x_mid = (bbox.Min.X + bbox.Max.X) / 2.0
-    y_mid = (bbox.Min.Y + bbox.Max.Y) / 2.0
-    z_point = bbox.Min.Z - OFFSET 
-    
-    return XYZ(x_mid, y_mid, z_point)
-
-
-##################################################################################
 #####                               CEILING                                 ######
 ##################################################################################
 def get_ceilings(doc):
@@ -174,7 +150,6 @@ def main(doc):
             
             for w in get_walls(doc): element_map[w] = get_point
             for f in get_floors(doc): element_map[f] = get_point_floor
-            for r in get_roofs(doc): element_map[r] = get_point_roof
             for c in get_ceilings(doc): element_map[c] = get_point_ceiling # Incluído no mapeamento
 
             for element, point_func in element_map.items():
