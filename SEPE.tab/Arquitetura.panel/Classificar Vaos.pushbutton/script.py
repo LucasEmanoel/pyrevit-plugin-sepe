@@ -11,7 +11,7 @@ from Autodesk.Revit.DB import (
 
 doc = __revit__.ActiveUIDocument.Document
 
-PARAM_VAO = "Contem Vão"
+PARAM_VAO = "Contém vãos"
 
 def get_walls(doc):
     """Lista com todas as paredes do projeto."""
